@@ -1,0 +1,146 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Project {
+  id: Float!
+  name: String!
+  employees: [Employee!]
+}
+
+type Employee {
+  id: Float!
+  name: String!
+  city: String!
+  description: String
+  projectId: Float!
+  project: Project!
+}
+
+type Options {
+  id: Float!
+  isCorrect: Boolean!
+  text: String!
+  questionId: Float!
+  question: Question!
+}
+
+type Question {
+  id: Float!
+  question: String!
+  quizId: Float!
+  options: [Options!]!
+}
+
+type Quiz {
+  id: Float!
+  title: String!
+  description: String!
+  questions: [Question!]!
+}
+
+type User {
+  id: Float!
+  email: String!
+  password: String!
+}
+
+type Query {
+  findAllProfile: String!
+  findByProfileId: String!
+  getAllEmployees: [Employee!]!
+  getAllProjects: [Project!]!
+  project(id: Float!): Project!
+  findAllQuiz: [Quiz!]!
+  findByQuizId(id: Int!): Quiz!
+  findAllQuestions: [Question!]!
+  findByQuestionId(id: Int!): Question!
+  findAllOptions: [Options!]!
+  findByOptionsId(id: Int!): Options!
+  login(loginInput: CreateUserInput!): String!
+  findAllUser: [User!]!
+  findUserById(id: Int!): User!
+  findByEmail(email: String!): User!
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createEmployee(employee: EmployeeCreateDto!): Employee!
+  createProject(project: CreateProjectInput!): Project!
+  updateProject(project: UpdateProjectInput!): Project!
+  removeProject(id: Int!): Project!
+  createQuiz(createQuizInput: CreateQuizInput!): Quiz!
+  updateQuiz(updateQuizInput: UpdateQuizInput!): Quiz!
+  removeQuiz(id: Int!): Quiz!
+  createQuestion(createQuestion: CreateQuestionInput!): Question!
+  updateQuestion(updateQuestionInput: UpdateQuestionInput!): Question!
+  removeQuestion(id: Int!): Question!
+  createOption(createOption: CreateOptionInput!): Options!
+  updateOption(updateOptionInput: UpdateOptionInput!): Options!
+  removeOption(id: Int!): Options!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: Int!): User!
+}
+
+input EmployeeCreateDto {
+  name: String!
+  city: String!
+  description: String!
+  projectId: Float!
+}
+
+input CreateProjectInput {
+  name: String!
+  code: Float!
+}
+
+input UpdateProjectInput {
+  id: Float!
+  name: String!
+  code: Float!
+}
+
+input CreateQuizInput {
+  title: String!
+  description: String!
+}
+
+input UpdateQuizInput {
+  title: String
+  description: String
+  id: Int!
+}
+
+input CreateQuestionInput {
+  question: String!
+  quizId: Float!
+}
+
+input UpdateQuestionInput {
+  question: String
+  quizId: Float
+  id: Int!
+}
+
+input CreateOptionInput {
+  text: String!
+  questionId: Float!
+  isCorrect: Boolean!
+}
+
+input UpdateOptionInput {
+  text: String
+  questionId: Float
+  isCorrect: Boolean
+  id: Int!
+}
+
+input UpdateUserInput {
+  email: String!
+  password: String
+}
