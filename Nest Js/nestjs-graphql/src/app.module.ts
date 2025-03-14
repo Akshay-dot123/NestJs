@@ -22,6 +22,10 @@ import { ProfileResolver } from './profile/profile.resolver';
 import { ProfileModule } from './profile/profile.module';
 import { APP_GUARD } from '@nestjs/core';
 import { GqlJwtAuthGuard } from './auth/jwt-auth.guard';
+import { StudentsModule } from './students/students.module';
+import { CoursesModule } from './courses/courses.module';
+import { Student } from './students/entities/student.entity';
+import { Course } from './courses/entities/course.entity';
 
 @Module({
   imports: [
@@ -36,7 +40,16 @@ import { GqlJwtAuthGuard } from './auth/jwt-auth.guard';
       username: process.env.DB_USERNAME || 'akshay',
       password: process.env.DB_PASSWORD || 'E1719prbu',
       database: process.env.DB_NAME || 'prac-grapghql',
-      entities: [Employee, Project, Quiz, Question, Options, User],
+      entities: [
+        Employee,
+        Project,
+        Quiz,
+        Question,
+        Options,
+        User,
+        Student,
+        Course,
+      ],
       synchronize: true,
     }),
     EmployeeModule,
@@ -47,6 +60,8 @@ import { GqlJwtAuthGuard } from './auth/jwt-auth.guard';
     AuthModule,
     UserModule,
     ProfileModule,
+    StudentsModule,
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [
