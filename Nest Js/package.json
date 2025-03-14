@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@nestjs/cli": "^11.0.5",
+    "@nestjs/sequelize": "^10.0.1",
+    "@types/express": "^5.0.0",
+    "@types/sequelize": "^4.28.20",
+    "pg": "^8.13.1",
+    "sequelize": "^6.37.5",
+    "sequelize-typescript": "^2.1.6",
+    "typeorm": "^0.3.20"
+  }
+}
