@@ -19,7 +19,7 @@ export class Question {
   @Field()
   question: string;
 
-  @Column()
+  @Column() // This neeeds tio be defined to make relation with other table
   @Field()
   quizId: number;
   @ManyToOne(() => Quiz, (quiz) => quiz.questions)

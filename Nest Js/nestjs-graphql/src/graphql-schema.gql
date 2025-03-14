@@ -45,6 +45,19 @@ type User {
   password: String!
 }
 
+type Course {
+  id: Float!
+  course: String!
+  students: [Student!]!
+}
+
+type Student {
+  id: Float!
+  name: String!
+  email: String!
+  courses: [Course!]!
+}
+
 type Query {
   findAllProfile: String!
   findByProfileId: String!
@@ -61,6 +74,10 @@ type Query {
   findAllUser: [User!]!
   findUserById(id: Int!): User!
   findByEmail(email: String!): User!
+  students: [Student!]!
+  student(id: Int!): Student!
+  courses: [Course!]!
+  course(id: Int!): Course!
 }
 
 input CreateUserInput {
@@ -85,6 +102,12 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: Int!): User!
+  createStudent(createStudentInput: CreateStudentInput!): Student!
+  updateStudent(updateStudentInput: UpdateStudentInput!): Student!
+  removeStudent(id: Int!): Student!
+  createCourse(createCourseInput: CreateCourseInput!): Course!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
+  removeCourse(id: Int!): Course!
 }
 
 input EmployeeCreateDto {
@@ -143,4 +166,26 @@ input UpdateOptionInput {
 input UpdateUserInput {
   email: String!
   password: String
+}
+
+input CreateStudentInput {
+  name: String!
+  email: String!
+  courseId: String!
+}
+
+input UpdateStudentInput {
+  name: String
+  email: String
+  courseId: String
+  id: Int!
+}
+
+input CreateCourseInput {
+  course: String!
+}
+
+input UpdateCourseInput {
+  course: String
+  id: Int!
 }
