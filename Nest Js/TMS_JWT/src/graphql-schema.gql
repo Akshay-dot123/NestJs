@@ -1,0 +1,146 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type TaskUser {
+  id: Int!
+  task: Task!
+  user: User!
+  task_status: Task_status!
+  task_priority: Task_priority!
+}
+
+"""The status of a task in the system"""
+enum Task_status {
+  To_Do
+  In_Progress
+  Completed
+}
+
+"""The priority of a task in the system"""
+enum Task_priority {
+  Low
+  Medium
+  High
+}
+
+type Task {
+  id: Int!
+  task_name: String!
+  description: String
+  created_by: Float!
+  updated_by: Float
+  projectId: Float!
+  taskUsers: [TaskUser!]!
+}
+
+type Project {
+  id: Int!
+  project_name: String!
+  completedPercentage: Float
+  description: String
+  created_by: Float!
+  updated_by: Float
+  tasks: [Task!]!
+  users: [User!]!
+}
+
+type User {
+  id: Float!
+  email: String!
+  password: String!
+  role: Role!
+  projects: [Project!]!
+  taskUsers: [TaskUser!]!
+}
+
+"""The roles of a user in the system"""
+enum Role {
+  Admin
+  Team_lead
+  Member
+}
+
+type Query {
+  findAllUsers: [User!]!
+  findByUserId(id: Int!): User!
+  login(loginInput: LoginUserInput!): String!
+  findAllProject: [Project!]!
+  findProjectById(id: Int!): Project!
+  findAllTask: [Task!]!
+  findTaskById(id: Int!): Task!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createUser(createUser: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  deleteUser(id: Int!): User!
+  createProject(createProject: CreateProjectInput!): Project!
+  updateProject(updateProjectInput: UpdateProjectInput!): Project!
+  deleteProject(id: Int!): Project!
+  createTask(createTask: CreateTaskInput!): Task!
+  updateTask(updateAdminTlTask: UpdateTaskInput!): Task!
+  updateMemberTask(updateMemberTask: UpdateTaskMemberInput!): TaskUser!
+  deleteTaskUser(id: Int!): TaskUser!
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  role: Role!
+}
+
+input UpdateUserInput {
+  email: String
+  password: String
+  role: Role
+  id: Int!
+}
+
+input CreateProjectInput {
+  project_name: String!
+  description: String = "Description"
+  updated_by: Int
+  userId: String!
+}
+
+input UpdateProjectInput {
+  project_name: String
+  description: String
+  updated_by: Int
+  userId: String!
+  id: Float!
+}
+
+input CreateTaskInput {
+  task_name: String!
+  description: String = "Description"
+  projectId: Float!
+  updated_by: Int
+  userId: String!
+  task_priority: Task_priority = Low
+  task_status: Task_status = To_Do
+}
+
+input UpdateTaskInput {
+  task_name: String!
+  description: String = "Description"
+  projectId: Float
+  updated_by: Int
+  userId: String!
+  task_priority: Task_priority = Low
+  task_status: Task_status = To_Do
+  id: Float!
+}
+
+input UpdateTaskMemberInput {
+  id: Float!
+  task_status: Task_status!
+  task_priority: Task_priority!
+  updated_by: Float!
+}
