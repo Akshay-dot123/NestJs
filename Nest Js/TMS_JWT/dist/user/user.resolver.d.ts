@@ -5,6 +5,7 @@ import { UpdateUserInput } from './dto/update-user.input';
 export declare class UserResolver {
     private readonly userService;
     constructor(userService: UserService);
+    me(context: any): any;
     createUser(createUserInput: CreateUserInput): Promise<User>;
     findAll(): Promise<User[]>;
     findOne(id: number): Promise<User | null>;

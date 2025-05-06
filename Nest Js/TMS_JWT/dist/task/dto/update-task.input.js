@@ -43,7 +43,6 @@ let UpdateTaskMemberInput = class UpdateTaskMemberInput {
     id;
     task_status;
     task_priority;
-    updated_by;
 };
 exports.UpdateTaskMemberInput = UpdateTaskMemberInput;
 __decorate([
@@ -58,10 +57,6 @@ __decorate([
     (0, graphql_1.Field)(() => task_enums_1.Task_priority),
     __metadata("design:type", String)
 ], UpdateTaskMemberInput.prototype, "task_priority", void 0);
-__decorate([
-    (0, graphql_1.Field)(),
-    __metadata("design:type", Number)
-], UpdateTaskMemberInput.prototype, "updated_by", void 0);
 exports.UpdateTaskMemberInput = UpdateTaskMemberInput = __decorate([
     (0, graphql_1.InputType)()
 ], UpdateTaskMemberInput);

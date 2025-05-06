@@ -10,7 +10,7 @@ export declare class ProjectService {
     private readonly userRepository;
     private readonly userService;
     constructor(projectRepository: Repository<Project>, userRepository: Repository<User>, userService: UserService);
-    create(createProjectInput: CreateProjectInput, createrRole: any): Promise<Project>;
+    create(createProjectInput: CreateProjectInput, createrRole: any): Promise<Project | undefined>;
     validateAssignedUsers(userId: string, userRole: any): Promise<User[]>;
     findAll(): Promise<Project[]>;
     findOne(id: number): Promise<{

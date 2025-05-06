@@ -14,13 +14,14 @@ const typeorm_1 = require("@nestjs/typeorm");
 const project_entity_1 = require("./entities/project.entity");
 const user_entity_1 = require("../user/entities/user.entity");
 const user_service_1 = require("../user/user.service");
+const pubsub_module_1 = require("../pubsub.module");
 let ProjectModule = class ProjectModule {
 };
 exports.ProjectModule = ProjectModule;
 exports.ProjectModule = ProjectModule = __decorate([
     (0, common_1.Module)({
         providers: [project_resolver_1.ProjectResolver, project_service_1.ProjectService, user_service_1.UserService],
-        imports: [typeorm_1.TypeOrmModule.forFeature([project_entity_1.Project, user_entity_1.User])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([project_entity_1.Project, user_entity_1.User]), pubsub_module_1.PubSubModule],
     })
 ], ProjectModule);
 //# sourceMappingURL=project.module.js.map

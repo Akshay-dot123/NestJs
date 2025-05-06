@@ -31,6 +31,8 @@ type Task {
   created_by: Float!
   updated_by: Float
   projectId: Float!
+  users: [User!]!
+  project: Project!
   taskUsers: [TaskUser!]!
 }
 
@@ -62,24 +64,22 @@ enum Role {
 }
 
 type Query {
+  me: User!
   findAllUsers: [User!]!
   findByUserId(id: Int!): User!
-  login(loginInput: LoginUserInput!): String!
   findAllProject: [Project!]!
   findProjectById(id: Int!): Project!
   findAllTask: [Task!]!
+  findAllUserTask: [TaskUser!]!
+  findUserTaskById(id: Int!): TaskUser!
   findTaskById(id: Int!): Task!
-}
-
-input LoginUserInput {
-  email: String!
-  password: String!
 }
 
 type Mutation {
   createUser(createUser: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   deleteUser(id: Int!): User!
+  login(loginInput: LoginUserInput!): String!
   createProject(createProject: CreateProjectInput!): Project!
   updateProject(updateProjectInput: UpdateProjectInput!): Project!
   deleteProject(id: Int!): Project!
@@ -87,6 +87,7 @@ type Mutation {
   updateTask(updateAdminTlTask: UpdateTaskInput!): Task!
   updateMemberTask(updateMemberTask: UpdateTaskMemberInput!): TaskUser!
   deleteTaskUser(id: Int!): TaskUser!
+  deleteTask(id: Int!): Task!
 }
 
 input CreateUserInput {
@@ -102,6 +103,11 @@ input UpdateUserInput {
   id: Int!
 }
 
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
 input CreateProjectInput {
   project_name: String!
   description: String = "Description"
@@ -111,7 +117,7 @@ input CreateProjectInput {
 
 input UpdateProjectInput {
   project_name: String
-  description: String
+  description: String = "Description"
   updated_by: Int
   userId: String!
   id: Float!
@@ -142,5 +148,9 @@ input UpdateTaskMemberInput {
   id: Float!
   task_status: Task_status!
   task_priority: Task_priority!
-  updated_by: Float!
+}
+
+type Subscription {
+  projectCreated(userId: Int!): Project!
+  taskCreated(userId: Int!): Task!
 }

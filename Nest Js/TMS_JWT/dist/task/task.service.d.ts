@@ -18,10 +18,15 @@ export declare class TaskService {
     constructor(taskRepository: Repository<Task>, taskUserRepository: Repository<TaskUser>, userRepository: Repository<User>, userService: UserService, roleService: RoleService, projectRepository: Repository<Project>);
     create(createTaskInput: CreateTaskInput, userRole: any): Promise<Task>;
     findAll(): Promise<Task[]>;
+    findAllUserTask(userRole: any): Promise<TaskUser[]>;
+    findUserTaskById(id: number): Promise<TaskUser | null>;
     findOne(id: number): Promise<Task | null>;
     updateAdminTlTask(id: number, UpdateTaskInput: UpdateTaskInput, userRole: any): Promise<Task>;
-    updateMember(id: number, UpdateTaskMemberInput: UpdateTaskMemberInput): Promise<TaskUser>;
+    updateMember(id: number, UpdateTaskMemberInput: UpdateTaskMemberInput, updater: any): Promise<TaskUser>;
     remove(id: number, removerRole: any): Promise<{
+        id: number;
+    }>;
+    removeTask(id: number, removerRole: any): Promise<{
         id: number;
     }>;
 }

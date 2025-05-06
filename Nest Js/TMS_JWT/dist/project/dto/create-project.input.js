@@ -22,6 +22,8 @@ exports.CreateProjectInput = CreateProjectInput;
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: 'Project is required' }),
     (0, graphql_1.Field)(),
+    (0, class_validator_1.MinLength)(3, { message: 'Project name must be at least 3 characters long' }),
+    (0, class_validator_1.MaxLength)(50, { message: 'Project name must be at most 50 characters long' }),
     __metadata("design:type", String)
 ], CreateProjectInput.prototype, "project_name", void 0);
 __decorate([

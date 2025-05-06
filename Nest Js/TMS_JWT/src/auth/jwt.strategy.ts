@@ -1,5 +1,3 @@
-// To verify jwt-Token and give access to routes like profile
-
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';

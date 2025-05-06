@@ -25,6 +25,10 @@ let UserResolver = class UserResolver {
     constructor(userService) {
         this.userService = userService;
     }
+    me(context) {
+        console.log("==================>", context.req.user);
+        return context.req.user;
+    }
     createUser(createUserInput) {
         return this.userService.create(createUserInput);
     }
@@ -44,6 +48,14 @@ let UserResolver = class UserResolver {
     }
 };
 exports.UserResolver = UserResolver;
+__decorate([
+    (0, graphql_1.Query)(() => user_entity_1.User, { name: 'me' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.GqlJwtAuthGuard),
+    __param(0, (0, graphql_1.Context)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "me", null);
 __decorate([
     (0, graphql_1.Mutation)(() => user_entity_1.User),
     __param(0, (0, graphql_1.Args)('createUser')),

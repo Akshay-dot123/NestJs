@@ -21,17 +21,24 @@ const update_project_input_1 = require("./dto/update-project.input");
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const jwt_1 = require("@nestjs/jwt");
+const graphql_2 = require("@nestjs/graphql");
+const common_2 = require("@nestjs/common");
+const graphql_subscriptions_1 = require("graphql-subscriptions");
 let ProjectResolver = class ProjectResolver {
     projectService;
     jwtService;
-    constructor(projectService, jwtService) {
+    pubSub;
+    constructor(projectService, jwtService, pubSub) {
         this.projectService = projectService;
         this.jwtService = jwtService;
+        this.pubSub = pubSub;
     }
-    createProject(createProjectInput, context) {
+    async createProject(createProjectInput, context) {
         const creatorRole = context.req.user;
         console.log('User Creating the Project:', creatorRole);
-        return this.projectService.create(createProjectInput, creatorRole);
+        const newProject = await this.projectService.create(createProjectInput, creatorRole);
+        await this.pubSub.publish('projectCreated', { projectCreated: newProject });
+        return newProject;
     }
     findAll() {
         return this.projectService.findAll();
@@ -49,6 +56,10 @@ let ProjectResolver = class ProjectResolver {
         console.log('User Deleting Project:', userRole);
         return this.projectService.remove(id, userRole);
     }
+    projectCreated(userId) {
+        console.log('New subscription started for userId:', userId);
+        return this.pubSub.asyncIterableIterator('projectCreated');
+    }
 };
 exports.ProjectResolver = ProjectResolver;
 __decorate([
@@ -58,7 +69,7 @@ __decorate([
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_project_input_1.CreateProjectInput, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ProjectResolver.prototype, "createProject", null);
 __decorate([
     (0, graphql_1.Query)(() => [project_entity_1.Project], { name: 'findAllProject' }),
@@ -93,9 +104,26 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", void 0)
 ], ProjectResolver.prototype, "deleteProject", null);
+__decorate([
+    (0, graphql_2.Subscription)(() => project_entity_1.Project, {
+        name: 'projectCreated',
+        filter: (payload, variables) => {
+            console.log('opopopopop');
+            console.log('Received filter variables:', variables);
+            const userIds = payload.projectCreated.users.map((user) => user.id);
+            return userIds.includes(variables.userId);
+        },
+    }),
+    __param(0, (0, graphql_1.Args)('userId', { type: () => graphql_1.Int })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ProjectResolver.prototype, "projectCreated", null);
 exports.ProjectResolver = ProjectResolver = __decorate([
     (0, graphql_1.Resolver)(() => project_entity_1.Project),
+    __param(2, (0, common_2.Inject)('PUB_SUB')),
     __metadata("design:paramtypes", [project_service_1.ProjectService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        graphql_subscriptions_1.PubSub])
 ], ProjectResolver);
 //# sourceMappingURL=project.resolver.js.map

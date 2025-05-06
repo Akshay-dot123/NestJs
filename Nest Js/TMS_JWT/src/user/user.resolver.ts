@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
@@ -9,6 +10,13 @@ import { UseGuards } from '@nestjs/common';
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
+
+  @Query(() => User, { name: 'me' })
+  @UseGuards(GqlJwtAuthGuard)
+  me(@Context() context) {
+    console.log("==================>",context.req.user);
+    return context.req.user;
+  }
 
   @Mutation(() => User)
   createUser(@Args('createUser') createUserInput: CreateUserInput) {

@@ -31,13 +31,13 @@ let AuthResolver = class AuthResolver {
         const res = context.res;
         res.cookie('token', accessToken);
         console.log(accessToken);
-        return 'Login Successful';
+        return accessToken.access_token;
     }
 };
 exports.AuthResolver = AuthResolver;
 __decorate([
     (0, common_1.UseGuards)(local_auth_guard_1.GqlAuthGuard),
-    (0, graphql_1.Query)(() => String, { name: 'login' }),
+    (0, graphql_1.Mutation)(() => String, { name: 'login' }),
     __param(0, (0, graphql_1.Args)('loginInput')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),

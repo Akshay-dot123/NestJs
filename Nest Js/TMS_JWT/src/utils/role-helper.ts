@@ -29,14 +29,28 @@ export class RoleService {
     let users: User[] = [];
 
     if (userId) {
+      // const assignedIds = userId
+      //   .split(',')
+      //   .map((id) => parseInt(id.trim(), 10));
+
+      // users = await this.userRepository.find({
+      //   where: { id: In(assignedIds) },
+      // });
+
       const assignedIds = userId
         .split(',')
-        .map((id) => parseInt(id.trim(), 10));
-
+        .map((id) => id.trim())
+        .filter((id) => /^\d+$/.test(id)) // Validate numeric strings
+        .map((id) => Number(id)); // Convert to number after validation
+      if (assignedIds.length === 0) {
+        throw new NotFoundException(
+          `Please insert valid existing Numeric UserId's`,
+        );
+      }
       users = await this.userRepository.find({
         where: { id: In(assignedIds) },
       });
-
+      console.log('number of users assigned', users);
       if (users.length === 0) {
         throw new NotFoundException('No valid People to be assigned found');
       }

@@ -30,42 +30,48 @@ export class ProjectService {
   ) {}
 
   async create(createProjectInput: CreateProjectInput, createrRole: any) {
-    if (createrRole.role === 'ADMIN' || createrRole.role === 'TEAM_LEAD') {
-      const { project_name, description, userId } = createProjectInput;
-      // let users: User[] = [];
-      // if (userId) {
-      //   const assigned_ids = userId
-      //     .split(',')
-      //     .map((id) => parseInt(id.trim(), 10));
-      //   users = await this.userRepository.find({
-      //     where: { id: In(assigned_ids) },
-      //   });
-      //   if (users.length === 0) {
-      //     throw new Error('No valid People to be assigned found');
-      //   }
-      //   if (user.role === 'TEAM_LEAD') {
-      //     const isAssigningToAdmin = users.some(
-      //       (assignedUser) => assignedUser.role === 'ADMIN',
-      //     );
-      //     if (isAssigningToAdmin) {
-      //       throw new ForbiddenException(
-      //         'TL cannot assign tasks to an Admin, please check userId',
-      //       );
-      //     }
-      //   }
-      // }
-      // Below does not work for project module but works for task module, dont know the reason
-      // const users = await this.roleService.validateAssignedUsers(userId, user);
-      const users = await this.validateAssignedUsers(userId, createrRole);
-      const project = this.projectRepository.create({
-        project_name,
-        description,
-        created_by: createrRole.id,
-        users,
-      });
-      return this.projectRepository.save(project);
-    } else {
-      throw new Error('Only TL or Admin can create Project for existing users');
+    try {
+      if (createrRole.role === 'ADMIN' || createrRole.role === 'TEAM_LEAD') {
+        const { project_name, description, userId } = createProjectInput;
+        // let users: User[] = [];
+        // if (userId) {
+        //   const assigned_ids = userId
+        //     .split(',')
+        //     .map((id) => parseInt(id.trim(), 10));
+        //   users = await this.userRepository.find({
+        //     where: { id: In(assigned_ids) },
+        //   });
+        //   if (users.length === 0) {
+        //     throw new Error('No valid People to be assigned found');
+        //   }
+        //   if (user.role === 'TEAM_LEAD') {
+        //     const isAssigningToAdmin = users.some(
+        //       (assignedUser) => assignedUser.role === 'ADMIN',
+        //     );
+        //     if (isAssigningToAdmin) {
+        //       throw new ForbiddenException(
+        //         'TL cannot assign tasks to an Admin, please check userId',
+        //       );
+        //     }
+        //   }
+        // }
+        // Below does not work for project module but works for task module, dont know the reason
+        // const users = await this.roleService.validateAssignedUsers(userId, user);
+        const users = await this.validateAssignedUsers(userId, createrRole);
+        const project = this.projectRepository.create({
+          project_name,
+          description,
+          created_by: createrRole.id,
+          users,
+        });
+        return this.projectRepository.save(project);
+      } else {
+        throw new Error(
+          'Only TL or Admin can create Project for existing users',
+        );
+      }
+    } catch (error) {
+      console.error('Project creation error:', error);
     }
   }
 
@@ -73,10 +79,6 @@ export class ProjectService {
     let users: User[] = [];
 
     if (userId) {
-      // const assignedIds = userId
-      //   .split(',')
-      //   .map((id) => parseInt(id.trim(), 10));
-
       const assignedIds = userId
         .split(',')
         .map((id) => id.trim())

@@ -18,13 +18,14 @@ const role_helper_1 = require("../utils/role-helper");
 const task_user_entity_1 = require("./entities/task-user.entity");
 const project_entity_1 = require("../project/entities/project.entity");
 const project_service_1 = require("../project/project.service");
+const pubsub_module_1 = require("../pubsub.module");
 let TaskModule = class TaskModule {
 };
 exports.TaskModule = TaskModule;
 exports.TaskModule = TaskModule = __decorate([
     (0, common_1.Module)({
         providers: [task_resolver_1.TaskResolver, task_service_1.TaskService, user_service_1.UserService, role_helper_1.RoleService, project_service_1.ProjectService],
-        imports: [typeorm_1.TypeOrmModule.forFeature([task_entity_1.Task, user_entity_1.User, task_user_entity_1.TaskUser, project_entity_1.Project])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([task_entity_1.Task, user_entity_1.User, task_user_entity_1.TaskUser, project_entity_1.Project]), pubsub_module_1.PubSubModule],
     })
 ], TaskModule);
 //# sourceMappingURL=task.module.js.map

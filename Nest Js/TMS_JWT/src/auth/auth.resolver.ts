@@ -12,7 +12,7 @@ export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
   //   @UseGuards(AuthGuard('local'))  //  This method does not work for graphql-nestjs configuration
   @UseGuards(GqlAuthGuard)
-  @Query(() => String, { name: 'login' })
+  @Mutation(() => String, { name: 'login' })
   async login(
     @Args('loginInput') loginInput: LoginUserInput,
     @Context() context,
@@ -26,6 +26,6 @@ export class AuthResolver {
     const res: Response = context.res;
     res.cookie('token',accessToken)
     console.log(accessToken);
-    return 'Login Successful';
+    return accessToken.access_token;
   }
 }

@@ -14,6 +14,7 @@ const graphql_1 = require("@nestjs/graphql");
 const project_entity_1 = require("../../project/entities/project.entity");
 const typeorm_1 = require("typeorm");
 const task_user_entity_1 = require("./task-user.entity");
+const user_entity_1 = require("../../user/entities/user.entity");
 let Task = class Task {
     id;
     task_name;
@@ -21,6 +22,7 @@ let Task = class Task {
     created_by;
     updated_by;
     projectId;
+    users;
     project;
     taskUsers;
 };
@@ -56,6 +58,11 @@ __decorate([
     __metadata("design:type", Number)
 ], Task.prototype, "projectId", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => [user_entity_1.User]),
+    __metadata("design:type", Array)
+], Task.prototype, "users", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => project_entity_1.Project),
     (0, typeorm_1.ManyToOne)(() => project_entity_1.Project, (project) => project.tasks),
     __metadata("design:type", project_entity_1.Project)
 ], Task.prototype, "project", void 0);

@@ -7,23 +7,36 @@ import { AuthService } from 'src/auth/auth.service';
 import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import { GqlJwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
+// Below 3 lines newly added
+import { Subscription } from '@nestjs/graphql';
+import { Inject } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';
 
 @Resolver(() => Project)
 export class ProjectResolver {
   constructor(
     private readonly projectService: ProjectService,
     private readonly jwtService: JwtService,
+    // Below line newly added
+    @Inject('PUB_SUB') private pubSub: PubSub, // Inject PubSub instance
   ) {}
 
   @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => Project)
-  createProject(
+  async createProject(
     @Args('createProject') createProjectInput: CreateProjectInput,
     @Context() context: any,
   ) {
     const creatorRole = context.req.user;
     console.log('User Creating the Project:', creatorRole);
-    return this.projectService.create(createProjectInput, creatorRole);
+    // return this.projectService.create(createProjectInput, creatorRole);
+    // Below 3 lines newly added
+    const newProject = await this.projectService.create(
+      createProjectInput,
+      creatorRole,
+    );
+    await this.pubSub.publish('projectCreated', { projectCreated: newProject }); // <--- this is new
+    return newProject;
   }
 
   @Query(() => [Project], { name: 'findAllProject' })
@@ -71,6 +84,21 @@ export class ProjectResolver {
     const userRole = context.req.user.role;
     console.log('User Deleting Project:', userRole);
     return this.projectService.remove(id, userRole);
+  }
+  // Below lines newly added
+  @Subscription(() => Project, {
+    // resolve: (value) => value,
+    name: 'projectCreated',
+    filter: (payload, variables) => {
+      console.log('opopopopop');
+      console.log('Received filter variables:', variables);
+      const userIds = payload.projectCreated.users.map((user) => user.id);
+      return userIds.includes(variables.userId);
+    },
+  })
+  projectCreated(@Args('userId', { type: () => Int }) userId: number) {
+    console.log('New subscription started for userId:', userId);
+    return this.pubSub.asyncIterableIterator('projectCreated');
   }
 }
 

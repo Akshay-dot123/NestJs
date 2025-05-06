@@ -11,6 +11,5 @@ export declare class UpdateTaskMemberInput {
     id: number;
     task_status: Task_status;
     task_priority: Task_priority;
-    updated_by: number;
 }
 export {};

@@ -55,7 +55,7 @@ let TaskService = class TaskService {
             console.log('User:', projectCreatedUser);
             if (userRole.role == 'ADMIN' ||
                 (userRole.role == 'TEAM_LEAD' && projectCreatedUser.role == 'TEAM_LEAD')) {
-                const users = await this.roleService.validateAssignedUsers(userId, userRole);
+                const users = await this.roleService.validateAssignedUsers(userId, userRole, projectId);
                 if (!users) {
                     throw new Error('Users do not exist');
                 }
@@ -85,6 +85,29 @@ let TaskService = class TaskService {
     findAll() {
         return this.taskRepository.find();
     }
+    async findAllUserTask(userRole) {
+        console.log('userRole==>', userRole);
+        const taskUsers = await this.taskUserRepository.find({
+            relations: ['task', 'task.project', 'user'],
+        });
+        console.log('======>taskUsers', taskUsers);
+        if (userRole.role == 'MEMBER') {
+            const filteredTaskUsers = taskUsers.filter((taskUser) => taskUser.user.id === userRole.id);
+            console.log('filteredTaskUsers========>', filteredTaskUsers);
+            return filteredTaskUsers;
+        }
+        else {
+            console.log('taskUsers====>', taskUsers);
+            return taskUsers;
+        }
+    }
+    async findUserTaskById(id) {
+        const taskUsers = await this.taskUserRepository.findOne({
+            where: { id },
+        });
+        console.log('taskUsers=======>', taskUsers);
+        return taskUsers;
+    }
     findOne(id) {
         return this.taskRepository.findOne({
             where: { id },
@@ -92,6 +115,7 @@ let TaskService = class TaskService {
         });
     }
     async updateAdminTlTask(id, UpdateTaskInput, userRole) {
+        let projectId;
         const task = await this.taskRepository.findOne({
             where: { id },
         });
@@ -109,10 +133,11 @@ let TaskService = class TaskService {
         console.log('Updater.role=========>', userRole.role);
         if ((Creator.role == 'TEAM_LEAD' && userRole.role == 'TEAM_LEAD') ||
             userRole.role == 'ADMIN') {
-            const users = await this.roleService.validateAssignedUsers(userId, Creator);
+            const users = await this.roleService.validateAssignedUsers(userId, Creator, projectId);
             if (!users) {
                 throw new Error('Users do not exist');
             }
+            console.log('users==========>', users);
             task.task_name = task_name;
             task.description = description;
             task.updated_by = userRole.id;
@@ -139,23 +164,18 @@ let TaskService = class TaskService {
             throw new common_1.UnauthorizedException('Updater is not authorized to update this task');
         }
     }
-    async updateMember(id, UpdateTaskMemberInput) {
+    async updateMember(id, UpdateTaskMemberInput, updater) {
         const task = await this.taskUserRepository.findOne({
             where: { id },
             relations: ['user'],
         });
+        console.log('Updater.role=========>', updater.role);
         if (!task) {
             throw new common_1.NotFoundException('Task not found');
         }
         if (!task.user)
             throw new common_1.NotFoundException('Task owner not found');
-        const { task_status, task_priority, updated_by } = UpdateTaskMemberInput;
-        const updater = await this.userRepository.findOne({
-            where: { id: updated_by },
-        });
-        if (!updater) {
-            throw new common_1.NotFoundException('Updater not found');
-        }
+        const { task_status, task_priority } = UpdateTaskMemberInput;
         const canUpdate = task.user.role === 'MEMBER' ||
             (task.user.role === 'ADMIN' && updater.role === 'ADMIN') ||
             (task.user.role === 'TEAM_LEAD' && updater.role === 'ADMIN') ||
@@ -186,6 +206,31 @@ let TaskService = class TaskService {
         }
         const deletedTaskId = task.id;
         await this.taskUserRepository.remove(task);
+        return { id: deletedTaskId };
+    }
+    async removeTask(id, removerRole) {
+        const task = await this.taskRepository.findOne({
+            where: { id },
+        });
+        if (!task) {
+            throw new Error('Task not found');
+        }
+        const user = await this.userRepository.findOne({
+            where: { id: task.created_by },
+        });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        console.log('Task created by user:', user.role);
+        const isAuthorized = removerRole === 'ADMIN' ||
+            (user.role === 'TEAM_LEAD' && removerRole === 'TEAM_LEAD');
+        if (!isAuthorized) {
+            throw new common_1.UnauthorizedException('Not authorized to remove this task');
+        }
+        const deletedTaskId = task.id;
+        console.log('deletedTaskId========>', deletedTaskId);
+        const a = await this.taskRepository.remove(task);
+        console.log('=========>', a);
         return { id: deletedTaskId };
     }
 };

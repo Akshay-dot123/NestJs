@@ -16,7 +16,7 @@ const create_project_input_1 = require("./create-project.input");
 let UpdateProjectInput = class UpdateProjectInput extends (0, graphql_1.PartialType)(create_project_input_1.CreateProjectInput) {
     id;
     project_name;
-    description;
+    description = 'Description';
     userId;
 };
 exports.UpdateProjectInput = UpdateProjectInput;
@@ -28,12 +28,12 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.MinLength)(3, { message: 'Project name must be at least 3 characters long' }),
+    (0, class_validator_1.MaxLength)(50, { message: 'Project name must be at most 50 characters long' }),
     __metadata("design:type", String)
 ], UpdateProjectInput.prototype, "project_name", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.MinLength)(3, { message: 'Project name must be at least 3 characters long' }),
     __metadata("design:type", String)
 ], UpdateProjectInput.prototype, "description", void 0);
 __decorate([

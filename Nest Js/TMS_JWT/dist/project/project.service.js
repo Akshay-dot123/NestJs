@@ -31,19 +31,24 @@ let ProjectService = class ProjectService {
         this.userService = userService;
     }
     async create(createProjectInput, createrRole) {
-        if (createrRole.role === 'ADMIN' || createrRole.role === 'TEAM_LEAD') {
-            const { project_name, description, userId } = createProjectInput;
-            const users = await this.validateAssignedUsers(userId, createrRole.role);
-            const project = this.projectRepository.create({
-                project_name,
-                description,
-                created_by: createrRole.id,
-                users,
-            });
-            return this.projectRepository.save(project);
+        try {
+            if (createrRole.role === 'ADMIN' || createrRole.role === 'TEAM_LEAD') {
+                const { project_name, description, userId } = createProjectInput;
+                const users = await this.validateAssignedUsers(userId, createrRole);
+                const project = this.projectRepository.create({
+                    project_name,
+                    description,
+                    created_by: createrRole.id,
+                    users,
+                });
+                return this.projectRepository.save(project);
+            }
+            else {
+                throw new Error('Only TL or Admin can create Project for existing users');
+            }
         }
-        else {
-            throw new Error('Only TL or Admin can create Project for existing users');
+        catch (error) {
+            console.error('Project creation error:', error);
         }
     }
     async validateAssignedUsers(userId, userRole) {
@@ -64,7 +69,8 @@ let ProjectService = class ProjectService {
             if (users.length === 0) {
                 throw new common_1.NotFoundException('No valid People to be assigned found');
             }
-            if (userRole === 'TEAM_LEAD') {
+            if (userRole.role === 'TEAM_LEAD') {
+                console.log('hui');
                 const isAssigningToAdmin = users.some((assignedUser) => assignedUser.role === 'ADMIN');
                 if (isAssigningToAdmin) {
                     throw new common_1.ForbiddenException('TL cannot assign tasks to an Admin, please check userId');
@@ -134,7 +140,7 @@ let ProjectService = class ProjectService {
         if (!user) {
             throw new common_1.NotFoundException('User not found');
         }
-        console.log("removerRole========>", removerRole);
+        console.log('removerRole========>', removerRole);
         const isAuthorized = removerRole === 'ADMIN' ||
             (user.role === 'TEAM_LEAD' && removerRole === 'TEAM_LEAD');
         if (!isAuthorized) {

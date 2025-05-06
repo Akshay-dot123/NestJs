@@ -22,6 +22,8 @@ const task_module_1 = require("./task/task.module");
 const task_entity_1 = require("./task/entities/task.entity");
 const task_user_entity_1 = require("./task/entities/task-user.entity");
 const auth_module_1 = require("./auth/auth.module");
+const graphql_subscriptions_1 = require("graphql-subscriptions");
+const pubsub_module_1 = require("./pubsub.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -30,8 +32,11 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             graphql_1.GraphQLModule.forRoot({
                 driver: apollo_1.ApolloDriver,
-                context: ({ req, res }) => ({ req, res }),
                 autoSchemaFile: (0, path_1.join)(process.cwd(), 'src/graphql-schema.gql'),
+                subscriptions: {
+                    'graphql-ws': true,
+                },
+                context: ({ req, res }) => ({ req, res }),
                 playground: true,
             }),
             typeorm_1.TypeOrmModule.forRoot({
@@ -44,6 +49,7 @@ exports.AppModule = AppModule = __decorate([
                 entities: [user_entity_1.User, project_entity_1.Project, task_entity_1.Task, task_user_entity_1.TaskUser],
                 synchronize: true,
             }),
+            pubsub_module_1.PubSubModule,
             user_module_1.UserModule,
             auth_module_1.AuthModule,
             project_module_1.ProjectModule,
@@ -52,6 +58,10 @@ exports.AppModule = AppModule = __decorate([
         controllers: [app_controller_1.AppController],
         providers: [
             app_service_1.AppService,
+            {
+                provide: 'PUB_SUB',
+                useValue: new graphql_subscriptions_1.PubSub(),
+            },
         ],
     })
 ], AppModule);

@@ -31,6 +31,6 @@ export class UpdateTaskMemberInput {
   @Field(() => Task_priority)
   task_priority: Task_priority;
 
-  @Field()
-  updated_by: number; // They still need to be identified
+  // @Field()
+  // updated_by: number; // They still need to be identified
 }

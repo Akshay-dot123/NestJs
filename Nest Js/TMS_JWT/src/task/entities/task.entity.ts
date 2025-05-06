@@ -17,6 +17,7 @@ import {
 } from 'typeorm';
 import { TaskUser } from './task-user.entity';
 import { Task_priority, Task_status } from './task.enums';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity()
 @ObjectType()
@@ -44,7 +45,10 @@ export class Task {
   @Column()
   @Field()
   projectId: number;
+  @Field(() => [User])
+  users: User[];
 
+  @Field(() => Project)
   @ManyToOne(() => Project, (project) => project.tasks)
   project: Project;
 

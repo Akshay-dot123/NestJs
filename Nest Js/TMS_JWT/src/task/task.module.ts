@@ -9,9 +9,10 @@ import { RoleService } from 'src/utils/role-helper';
 import { TaskUser } from './entities/task-user.entity';
 import { Project } from 'src/project/entities/project.entity';
 import { ProjectService } from 'src/project/project.service';
+import { PubSubModule } from 'src/pubsub.module';
 
 @Module({
   providers: [TaskResolver, TaskService, UserService, RoleService, ProjectService],
-  imports: [TypeOrmModule.forFeature([Task, User, TaskUser, Project])],
+  imports: [TypeOrmModule.forFeature([Task, User, TaskUser, Project]), PubSubModule],
 })
 export class TaskModule {}
