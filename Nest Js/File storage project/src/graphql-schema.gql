@@ -1,0 +1,65 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: Float!
+  email: String!
+  password: String!
+  role: Role!
+}
+
+"""The roles of a user in the system"""
+enum Role {
+  Admin
+  user
+}
+
+type File {
+  id: Float!
+  filePath: String
+  fileId: String!
+  filename: String!
+  mimetype: String!
+  size: Float!
+  userId: String!
+  encoding: String!
+}
+
+type Query {
+  findAllUsers: [User!]!
+  findByUserId(id: Int!): User!
+  login(loginInput: LoginUserInput!): String!
+  findFileId(fileId: String!): String!
+  findAllFiles: [File!]!
+  getDownloadLink(fileId: String!): String!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createUser(createUser: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  deleteUser(id: Int!): User!
+  uploadImages(images: [Upload!]!, createFileInDirectory: Boolean!): Boolean!
+  deleteFile(fileId: String!): String!
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  role: Role!
+}
+
+input UpdateUserInput {
+  email: String
+  password: String
+  role: Role
+  id: Int!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload

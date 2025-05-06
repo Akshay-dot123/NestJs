@@ -1,0 +1,14 @@
+The affectHistory value in the existing code for SQS1 and SQS2 is determined as follows:
+
+0 → when SYNC_EXT_ACTION is null or empty
+
+1 → when SYNC_EXT_ACTION is SALESTEAM_CHG_ALL
+
+2 → when SYNC_EXT_ACTION is SALESTEAM_CHG_CRM
+
+All of the above values are extracted from the NG_SYNC_PRO table.
+
+For SQS1, sqsmessage will be sent for every record, regardless of whether the affectHistory values are the same or different.
+For SQS2, only a single sqsmessage will be sent for Records with same affectHistory value. Note that the UUID will be the same for all records sharing the same affectHistory.
+For example, if the 'company' table has multiple records with affectHistory values of 0, 1, or 2, then:
+Three unique UUID's will be generated where all records with affectHistory = 0 will have same UUID, all records with affectHistory = 1 will share the same UUID, all records with affectHistory = 2 will share the same UUID.
