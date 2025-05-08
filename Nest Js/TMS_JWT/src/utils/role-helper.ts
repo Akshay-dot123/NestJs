@@ -50,7 +50,7 @@ export class RoleService {
       users = await this.userRepository.find({
         where: { id: In(assignedIds) },
       });
-      console.log('number of users assigned', users);
+      // console.log('number of users assigned', users);
       if (users.length === 0) {
         throw new NotFoundException('No valid People to be assigned found');
       }

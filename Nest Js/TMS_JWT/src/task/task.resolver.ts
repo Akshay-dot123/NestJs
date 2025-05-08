@@ -18,12 +18,15 @@ import { TaskUser } from './entities/task-user.entity';
 import { GqlJwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Inject, UseGuards } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
-import { TaskResponse } from './entities/task-response.model';
-
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entities/user.entity';
+import * as cookie from 'cookie';
+import * as Jwt from 'jsonwebtoken';
 @Resolver(() => Task)
 export class TaskResolver {
   constructor(
     private readonly taskService: TaskService,
+    private readonly userService: UserService,
     @Inject('PUB_SUB') private pubSub: PubSub,
   ) {}
 
@@ -35,11 +38,10 @@ export class TaskResolver {
     @Context() context: any,
   ) {
     const userRole = context.req.user;
-    console.log('Creating a task', userRole);
     // return this.taskService.create(createTaskInput, userRole);
     const newTask = await this.taskService.create(createTaskInput, userRole);
     await this.pubSub.publish('taskCreated', { taskCreated: newTask }); // <--- this is new
-    console.log("newTask=========>",newTask)
+    // console.log('newTask=========>', newTask);
     return newTask;
     // const { savedTask, taskUsers } = await this.taskService.create(
     //   createTaskInput,
@@ -97,17 +99,25 @@ export class TaskResolver {
 
   @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => TaskUser)
-  updateMemberTask(
+  async updateMemberTask(
     @Args('updateMemberTask') updateMemberTaskInput: UpdateTaskMemberInput,
     @Context() context: any,
   ) {
     const userRole = context.req.user;
     console.log('Updating User or Member Task', userRole);
-    return this.taskService.updateMember(
+    // return this.taskService.updateMember(
+    //   updateMemberTaskInput.id,
+    //   updateMemberTaskInput,
+    //   userRole,
+    // );
+    const updatedTask = await this.taskService.updateMember(
       updateMemberTaskInput.id,
       updateMemberTaskInput,
       userRole,
     );
+    await this.pubSub.publish('taskUpdated', { taskUpdated: updatedTask });
+    console.log('Updated Stattus', updatedTask);
+    return updatedTask;
   }
 
   @UseGuards(GqlJwtAuthGuard)
@@ -132,24 +142,100 @@ export class TaskResolver {
     return this.taskService.removeTask(id, userRole);
   }
 
-  // @Subscription(() => TaskResponse, {
   @Subscription(() => Task, {
     // resolve: (value) => value,
     name: 'taskCreated',
     filter: (payload, variables) => {
-      console.log('opopopopop');
-      console.log('Received filter variables:', variables);
+      console.log('Received filter variables in Task:', variables);
       console.log('payload===========>', payload);
-      return variables; // dummy return
-
-      // New TaskResponse return 
-      // return payload.taskUsersCreated.some((taskUser) => {
-      //   return taskUser.user.includes(variables.userId);
-      // });
+      const users = payload.taskCreated.taskUsers.map(
+        (taskUser) => taskUser.user,
+      );
+      console.log('Extracted users:', users);
+      return users.some((user) => user.id === variables.userId);
     },
   })
   taskCreated(@Args('userId', { type: () => Int }) userId: number) {
     console.log('New subscription started for userId in Task:', userId);
     return this.pubSub.asyncIterableIterator('taskCreated');
   }
+
+  @Subscription(() => TaskUser, {
+    name: 'taskUpdated',
+    filter: (payload, variables, context) => {
+
+      // const user = context.req.extra;
+      // const cookieHeader =
+      //   user.request.headers?.cookie || context.connectionParams?.cookie;
+      // const cookies = cookie.parse(cookieHeader);
+      // const rawToken = cookies.token;
+      // if (!rawToken) {
+      //   throw new Error('hi');
+      // }
+      // const jsonToken = JSON.parse(rawToken.slice(2)); // remove 'j:' prefix
+      // const accessToken = jsonToken.access_token;
+      // const decoded = Jwt.verify(accessToken, 'Nivalsa'); // Handle try/catch here
+      // console.log('Decoded token:', decoded['role']);
+      // console.log(payload.taskUpdated.user.role)
+      // const role = decoded['role'];
+      // if (role === 'ADMIN') {
+      //   return payload.taskUpdated.user.role === 'ADMIN';
+      // }
+      // return false;
+
+      // console.log('Received filter variables in Task:', variables);
+      console.log('payload===========>', payload);
+      console.log(payload.taskUpdated.user.id === variables.userId);
+      return payload.taskUpdated.user.id === variables.userId;
+      // return true;
+    },
+  })
+  taskUpdated(@Args('userId', { type: () => Int }) userId: number) {
+    console.log('New subscription started for userId in update Task:', userId);
+    return this.pubSub.asyncIterableIterator('taskUpdated');
+  }
+
+  // New dummy code, please dont delete this as it might require in future :-
+  // private async filterTaskUpdate(
+  //   payload: any,
+  //   variables: any,
+  //   context: any,
+  // ): Promise<boolean> {
+  //   const user = context.req.extra;
+  //   const cookieHeader =
+  //     user.request.headers?.cookie || context.connectionParams?.cookie;
+  //   const cookies = cookie.parse(cookieHeader);
+  //   const rawToken = cookies.token;
+  //   if (!rawToken) {
+  //     throw new Error('No token found');
+  //   }
+  //   const jsonToken = JSON.parse(rawToken.slice(2));
+  //   const accessToken = jsonToken.access_token;
+
+  //   let decoded;
+  //   try {
+  //     decoded = Jwt.verify(accessToken, 'Nivalsa');
+  //   } catch (err) {
+  //     console.error('JWT verification error:', err);
+  //     return false;
+  //   }
+  //   console.log("Data of=======>",payload.taskUpdated.user.role)
+  //   const dbUser = await this.userService.findOne(decoded.id);
+  //   console.log('Fetched user from DB:', dbUser?.role);
+  //   if(payload.taskUpdated.user.role=='MEMBER'){
+
+  //   }
+  //   return true;
+  // }
+  // @Subscription(() => TaskUser, {
+  //   name: 'taskUpdated',
+  //   filter: function (this: TaskResolver, payload, variables, context) {
+  //     console.log("asd")
+  //     return this.filterTaskUpdate(payload, variables, context);
+  //   },
+  // })
+  // taskUpdated(@Args('userId', { type: () => Int }) userId: number) {
+  //   console.log('New subscription started for userId in update Task:', userId);
+  //   return this.pubSub.asyncIterableIterator('taskUpdated');
+  // }
 }

@@ -16,7 +16,7 @@ export declare class TaskService {
     private readonly roleService;
     private readonly projectRepository;
     constructor(taskRepository: Repository<Task>, taskUserRepository: Repository<TaskUser>, userRepository: Repository<User>, userService: UserService, roleService: RoleService, projectRepository: Repository<Project>);
-    create(createTaskInput: CreateTaskInput, userRole: any): Promise<Task>;
+    create(createTaskInput: CreateTaskInput, userRole: any): Promise<Task | null>;
     findAll(): Promise<Task[]>;
     findAllUserTask(userRole: any): Promise<TaskUser[]>;
     findUserTaskById(id: number): Promise<TaskUser | null>;

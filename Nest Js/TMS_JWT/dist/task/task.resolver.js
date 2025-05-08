@@ -22,19 +22,20 @@ const task_user_entity_1 = require("./entities/task-user.entity");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const common_1 = require("@nestjs/common");
 const graphql_subscriptions_1 = require("graphql-subscriptions");
+const user_service_1 = require("../user/user.service");
 let TaskResolver = class TaskResolver {
     taskService;
+    userService;
     pubSub;
-    constructor(taskService, pubSub) {
+    constructor(taskService, userService, pubSub) {
         this.taskService = taskService;
+        this.userService = userService;
         this.pubSub = pubSub;
     }
     async createTask(createTaskInput, context) {
         const userRole = context.req.user;
-        console.log('Creating a task', userRole);
         const newTask = await this.taskService.create(createTaskInput, userRole);
         await this.pubSub.publish('taskCreated', { taskCreated: newTask });
-        console.log("newTask=========>", newTask);
         return newTask;
     }
     findAll() {
@@ -56,10 +57,13 @@ let TaskResolver = class TaskResolver {
         console.log('Updating TL or Member Task', userRole);
         return this.taskService.updateAdminTlTask(updateTaskInput.id, updateTaskInput, userRole);
     }
-    updateMemberTask(updateMemberTaskInput, context) {
+    async updateMemberTask(updateMemberTaskInput, context) {
         const userRole = context.req.user;
         console.log('Updating User or Member Task', userRole);
-        return this.taskService.updateMember(updateMemberTaskInput.id, updateMemberTaskInput, userRole);
+        const updatedTask = await this.taskService.updateMember(updateMemberTaskInput.id, updateMemberTaskInput, userRole);
+        await this.pubSub.publish('taskUpdated', { taskUpdated: updatedTask });
+        console.log('Updated Stattus', updatedTask);
+        return updatedTask;
     }
     deleteTaskUser(id, context) {
         const userRole = context.req.user.role;
@@ -74,6 +78,10 @@ let TaskResolver = class TaskResolver {
     taskCreated(userId) {
         console.log('New subscription started for userId in Task:', userId);
         return this.pubSub.asyncIterableIterator('taskCreated');
+    }
+    taskUpdated(userId) {
+        console.log('New subscription started for userId in update Task:', userId);
+        return this.pubSub.asyncIterableIterator('taskUpdated');
     }
 };
 exports.TaskResolver = TaskResolver;
@@ -130,7 +138,7 @@ __decorate([
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [update_task_input_1.UpdateTaskMemberInput, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "updateMemberTask", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.GqlJwtAuthGuard),
@@ -154,10 +162,11 @@ __decorate([
     (0, graphql_1.Subscription)(() => task_entity_1.Task, {
         name: 'taskCreated',
         filter: (payload, variables) => {
-            console.log('opopopopop');
-            console.log('Received filter variables:', variables);
+            console.log('Received filter variables in Task:', variables);
             console.log('payload===========>', payload);
-            return variables;
+            const users = payload.taskCreated.taskUsers.map((taskUser) => taskUser.user);
+            console.log('Extracted users:', users);
+            return users.some((user) => user.id === variables.userId);
         },
     }),
     __param(0, (0, graphql_1.Args)('userId', { type: () => graphql_1.Int })),
@@ -165,10 +174,25 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], TaskResolver.prototype, "taskCreated", null);
+__decorate([
+    (0, graphql_1.Subscription)(() => task_user_entity_1.TaskUser, {
+        name: 'taskUpdated',
+        filter: (payload, variables, context) => {
+            console.log('payload===========>', payload);
+            console.log(payload.taskUpdated.user.id === variables.userId);
+            return payload.taskUpdated.user.id === variables.userId;
+        },
+    }),
+    __param(0, (0, graphql_1.Args)('userId', { type: () => graphql_1.Int })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], TaskResolver.prototype, "taskUpdated", null);
 exports.TaskResolver = TaskResolver = __decorate([
     (0, graphql_1.Resolver)(() => task_entity_1.Task),
-    __param(1, (0, common_1.Inject)('PUB_SUB')),
+    __param(2, (0, common_1.Inject)('PUB_SUB')),
     __metadata("design:paramtypes", [task_service_1.TaskService,
+        user_service_1.UserService,
         graphql_subscriptions_1.PubSub])
 ], TaskResolver);
 //# sourceMappingURL=task.resolver.js.map

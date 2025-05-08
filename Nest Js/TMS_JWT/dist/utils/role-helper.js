@@ -39,7 +39,6 @@ let RoleService = class RoleService {
             users = await this.userRepository.find({
                 where: { id: (0, typeorm_2.In)(assignedIds) },
             });
-            console.log('number of users assigned', users);
             if (users.length === 0) {
                 throw new common_1.NotFoundException('No valid People to be assigned found');
             }

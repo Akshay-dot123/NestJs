@@ -42,6 +42,7 @@ export class ProjectService {
         //     where: { id: In(assigned_ids) },
         //   });
         //   if (users.length === 0) {
+          
         //     throw new Error('No valid People to be assigned found');
         //   }
         //   if (user.role === 'TEAM_LEAD') {
@@ -93,7 +94,7 @@ export class ProjectService {
       users = await this.userRepository.find({
         where: { id: In(assignedIds) },
       });
-      console.log('number of users assigned', users);
+      // console.log('number of users assigned', users);
       if (users.length === 0) {
         throw new NotFoundException('No valid People to be assigned found');
       }
@@ -112,8 +113,35 @@ export class ProjectService {
     return users;
   }
 
-  findAll() {
-    return this.projectRepository.find({ relations: ['tasks'] });
+  // findAll() {
+  //   return this.projectRepository.find({ relations: ['tasks'] });
+  // }
+
+  async findAll() {
+    const projects = await this.projectRepository.find({
+      relations: ['tasks', 'tasks.taskUsers'],
+    });
+    let totalTasks;
+    let completedTasks;
+    return projects.map((project) => {
+      const taskUsers = project.tasks.flatMap((task) => task.taskUsers);
+      totalTasks = taskUsers.length;
+      completedTasks = taskUsers.filter(
+        (taskUser) => taskUser.task_status === 'Completed',
+      ).length;
+
+      const completedPercentage =
+        totalTasks === 0
+          ? 0
+          : parseFloat(((completedTasks / totalTasks) * 100).toFixed(2));
+
+      return {
+        ...project,
+        completedPercentage,
+        totalTasks,
+        completedTasks,
+      };
+    });
   }
 
   // async findOne(id: number) {

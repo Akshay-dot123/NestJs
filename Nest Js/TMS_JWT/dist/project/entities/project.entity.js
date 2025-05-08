@@ -18,6 +18,8 @@ let Project = class Project {
     id;
     project_name;
     completedPercentage;
+    totalTasks;
+    completedTasks;
     description;
     created_by;
     updated_by;
@@ -40,6 +42,14 @@ __decorate([
     (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
     __metadata("design:type", Number)
 ], Project.prototype, "completedPercentage", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
+    __metadata("design:type", Number)
+], Project.prototype, "totalTasks", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
+    __metadata("design:type", Number)
+], Project.prototype, "completedTasks", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, typeorm_1.Column)({ nullable: true }),

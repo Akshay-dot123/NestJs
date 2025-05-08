@@ -39,7 +39,7 @@ let TaskService = class TaskService {
     }
     async create(createTaskInput, userRole) {
         if (userRole.role === 'ADMIN' || userRole.role === 'TEAM_LEAD') {
-            const { projectId, task_name, userId, task_status, task_priority } = createTaskInput;
+            const { projectId, task_name, description, userId, task_status, task_priority, } = createTaskInput;
             const project = await this.projectRepository.findOne({
                 where: { id: projectId },
             });
@@ -52,7 +52,6 @@ let TaskService = class TaskService {
                 throw new common_1.NotFoundException('User not found');
             }
             console.log('userRole===========>', userRole.role);
-            console.log('User:', projectCreatedUser);
             if (userRole.role == 'ADMIN' ||
                 (userRole.role == 'TEAM_LEAD' && projectCreatedUser.role == 'TEAM_LEAD')) {
                 const users = await this.roleService.validateAssignedUsers(userId, userRole, projectId);
@@ -62,6 +61,7 @@ let TaskService = class TaskService {
                 const task = this.taskRepository.create({
                     projectId,
                     task_name,
+                    description,
                     created_by: userRole.id,
                 });
                 const savedTask = await this.taskRepository.save(task);
@@ -72,7 +72,11 @@ let TaskService = class TaskService {
                     task_priority,
                 }));
                 await this.taskUserRepository.save(taskUsers);
-                return savedTask;
+                const fullTask = await this.taskRepository.findOne({
+                    where: { id: savedTask.id },
+                    relations: ['taskUsers.user'],
+                });
+                return fullTask;
             }
             else {
                 throw new Error('TL cannot assign tasks for Project created by Admin');
@@ -82,22 +86,21 @@ let TaskService = class TaskService {
             throw new Error('Only TL and Admins can assign tasks');
         }
     }
-    findAll() {
-        return this.taskRepository.find();
+    async findAll() {
+        return this.taskRepository.find({
+            relations: ['project'],
+        });
     }
     async findAllUserTask(userRole) {
         console.log('userRole==>', userRole);
         const taskUsers = await this.taskUserRepository.find({
             relations: ['task', 'task.project', 'user'],
         });
-        console.log('======>taskUsers', taskUsers);
         if (userRole.role == 'MEMBER') {
             const filteredTaskUsers = taskUsers.filter((taskUser) => taskUser.user.id === userRole.id);
-            console.log('filteredTaskUsers========>', filteredTaskUsers);
             return filteredTaskUsers;
         }
         else {
-            console.log('taskUsers====>', taskUsers);
             return taskUsers;
         }
     }
@@ -105,7 +108,6 @@ let TaskService = class TaskService {
         const taskUsers = await this.taskUserRepository.findOne({
             where: { id },
         });
-        console.log('taskUsers=======>', taskUsers);
         return taskUsers;
     }
     findOne(id) {
@@ -165,6 +167,7 @@ let TaskService = class TaskService {
         }
     }
     async updateMember(id, UpdateTaskMemberInput, updater) {
+        console.log("We are updating member task brooooooooooo!!!!!!!!!!!!!!!!!!!");
         const task = await this.taskUserRepository.findOne({
             where: { id },
             relations: ['user'],

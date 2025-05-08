@@ -108,9 +108,10 @@ __decorate([
     (0, graphql_2.Subscription)(() => project_entity_1.Project, {
         name: 'projectCreated',
         filter: (payload, variables) => {
-            console.log('opopopopop');
             console.log('Received filter variables:', variables);
+            console.log('payload===========>', payload);
             const userIds = payload.projectCreated.users.map((user) => user.id);
+            console.log("===============>", userIds);
             return userIds.includes(variables.userId);
         },
     }),

@@ -33,8 +33,14 @@ export class TaskService {
 
   async create(createTaskInput: CreateTaskInput, userRole: any) {
     if (userRole.role === 'ADMIN' || userRole.role === 'TEAM_LEAD') {
-      const { projectId, task_name, userId, task_status, task_priority } =
-        createTaskInput;
+      const {
+        projectId,
+        task_name,
+        description,
+        userId,
+        task_status,
+        task_priority,
+      } = createTaskInput;
       const project = await this.projectRepository.findOne({
         where: { id: projectId },
       });
@@ -47,7 +53,7 @@ export class TaskService {
         throw new NotFoundException('User not found');
       }
       console.log('userRole===========>', userRole.role);
-      console.log('User:', projectCreatedUser);
+      // console.log('User:', projectCreatedUser);
       // let projectId;
       if (
         userRole.role == 'ADMIN' ||
@@ -66,6 +72,7 @@ export class TaskService {
         const task = this.taskRepository.create({
           projectId,
           task_name,
+          description,
           created_by: userRole.id,
         });
         const savedTask = await this.taskRepository.save(task);
@@ -79,8 +86,11 @@ export class TaskService {
           }),
         );
         await this.taskUserRepository.save(taskUsers);
-        return savedTask;
-        // return {savedTask, taskUsers}
+        const fullTask = await this.taskRepository.findOne({
+          where: { id: savedTask.id },
+          relations: ['taskUsers.user'],
+        });
+        return fullTask;
       } else {
         throw new Error('TL cannot assign tasks for Project created by Admin');
       }
@@ -89,8 +99,10 @@ export class TaskService {
     }
   }
 
-  findAll() {
-    return this.taskRepository.find();
+  async findAll() {
+    return this.taskRepository.find({
+      relations: ['project'],
+    });
   }
 
   async findAllUserTask(userRole: any) {
@@ -98,15 +110,15 @@ export class TaskService {
     const taskUsers = await this.taskUserRepository.find({
       relations: ['task', 'task.project', 'user'],
     });
-    console.log('======>taskUsers', taskUsers);
+    // console.log('======>taskUsers', taskUsers);
     if (userRole.role == 'MEMBER') {
       const filteredTaskUsers = taskUsers.filter(
         (taskUser) => taskUser.user.id === userRole.id,
       );
-      console.log('filteredTaskUsers========>', filteredTaskUsers);
+      // console.log('filteredTaskUsers========>', filteredTaskUsers);
       return filteredTaskUsers;
     } else {
-      console.log('taskUsers====>', taskUsers);
+      // console.log('taskUsers====>', taskUsers);
       return taskUsers;
     }
   }
@@ -116,7 +128,7 @@ export class TaskService {
     const taskUsers = await this.taskUserRepository.findOne({
       where: { id },
     });
-    console.log('taskUsers=======>', taskUsers);
+    // console.log('taskUsers=======>', taskUsers);
     return taskUsers;
   }
 
@@ -201,6 +213,7 @@ export class TaskService {
     UpdateTaskMemberInput: UpdateTaskMemberInput,
     updater: any,
   ) {
+    console.log("We are updating member task brooooooooooo!!!!!!!!!!!!!!!!!!!")
     const task = await this.taskUserRepository.findOne({
       where: { id },
       relations: ['user'],

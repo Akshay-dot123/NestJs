@@ -27,6 +27,10 @@ export class Project {
   // This field will not be stored in db because @Column() does not exists
   @Field(() => Float, { nullable: true })
   completedPercentage?: number;
+  @Field(() => Float, { nullable: true })
+  totalTasks?: number;
+  @Field(() => Float, { nullable: true })
+  completedTasks?: number;
 
   @Field({ nullable: true })
   @Column({ nullable: true })

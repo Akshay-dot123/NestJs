@@ -12,11 +12,25 @@ export declare class ProjectService {
     constructor(projectRepository: Repository<Project>, userRepository: Repository<User>, userService: UserService);
     create(createProjectInput: CreateProjectInput, createrRole: any): Promise<Project | undefined>;
     validateAssignedUsers(userId: string, userRole: any): Promise<User[]>;
-    findAll(): Promise<Project[]>;
+    findAll(): Promise<{
+        completedPercentage: number;
+        totalTasks: any;
+        completedTasks: any;
+        id: number;
+        project_name: string;
+        description?: string;
+        created_by: number;
+        updated_by: number;
+        tasks: Task[];
+        users: User[];
+        userId: string;
+    }[]>;
     findOne(id: number): Promise<{
         completedPercentage: number;
         id: number;
         project_name: string;
+        totalTasks?: number;
+        completedTasks?: number;
         description?: string;
         created_by: number;
         updated_by: number;

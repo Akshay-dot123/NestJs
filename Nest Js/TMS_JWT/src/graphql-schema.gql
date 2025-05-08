@@ -40,6 +40,8 @@ type Project {
   id: Int!
   project_name: String!
   completedPercentage: Float
+  totalTasks: Float
+  completedTasks: Float
   description: String
   created_by: Float!
   updated_by: Float
@@ -153,4 +155,5 @@ input UpdateTaskMemberInput {
 type Subscription {
   projectCreated(userId: Int!): Project!
   taskCreated(userId: Int!): Task!
+  taskUpdated(userId: Int!): TaskUser!
 }

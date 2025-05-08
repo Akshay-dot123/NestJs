@@ -1,0 +1,34 @@
+services:
+  nestjs_api:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    build:
+      context:  .  # This specifies the current directory as the build context
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3000'
+    environment:
+    #   - PORT=3000
+      - NODE_ENV=development
+      # - DB_HOST=192.168.1.100  # Use the host's IP address here
+    volumes:
+      - ./src:/akshay/src/app/src
+#     networks:
+#       - my_custom_network
+# networks:
+#   my_custom_network:
+#     external: false
+
+
+
+# version: '3.8'
+# services:
+#   app:
+#     build: .
+#     ports:
+#       - "3000:3000"
+#     volumes:
+#       - .:/akshay/src/app
+#       - /akshay/src/app/node_modules
+#     environment:
+#       - NODE_ENV=production

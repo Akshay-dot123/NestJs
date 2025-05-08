@@ -85,14 +85,16 @@ export class ProjectResolver {
     console.log('User Deleting Project:', userRole);
     return this.projectService.remove(id, userRole);
   }
+  
   // Below lines newly added
   @Subscription(() => Project, {
     // resolve: (value) => value,
     name: 'projectCreated',
     filter: (payload, variables) => {
-      console.log('opopopopop');
       console.log('Received filter variables:', variables);
+      console.log('payload===========>', payload);
       const userIds = payload.projectCreated.users.map((user) => user.id);
+      console.log("===============>",userIds)
       return userIds.includes(variables.userId);
     },
   })
