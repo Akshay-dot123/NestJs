@@ -34,6 +34,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`User Disconnected: ${socket.id}`);
   }
 
+  // Note:- socket.emit('dsfdds',someMessage) --> Displays the message only to user who sent the message
+  // socket.broadcast.emit('dsfdds',someMessage) --> Displays the message to all other users except for those who sent the message
+
   @SubscribeMessage('join_room') // Is same as socket.on('join_room')
   async handleJoinRoom(
     @MessageBody() rawdata: any,
@@ -89,24 +92,62 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.emit('receive_message', result);
   }
 
+  // Don't dont delete this part of code as below code sometimes does not work
+  // @SubscribeMessage('get_room_messages')
+  // async handleGetMessages(
+  //   @MessageBody() body: { room: string; username: string },
+  //   @ConnectedSocket() socket: Socket,
+  // ) {
+  //   const Room = await this.roomService.findAllRoom(body.room);
+  //   // console.log('Room=======>', Room);
+  //   const sortedMessages = Room.sort(
+  //     (a, b) =>
+  //       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  //   );
+  //   socket.emit('room_messages', sortedMessages);
+  //   socket.broadcast.emit('room_messages', sortedMessages);
+  // }
+
+  // New functionlaity working but sometimes dont work
   @SubscribeMessage('get_room_messages')
   async handleGetMessages(
     @MessageBody() body: { room: string; username: string },
     @ConnectedSocket() socket: Socket,
   ) {
     const Room = await this.roomService.findAllRoom(body.room);
-    console.log('Room=======>', Room);
-    // const userName = await this.userService.findOne(body.username);
-    const sortedMessages = Room.sort(
+    const userName = await this.userService.findOne(body.username);
+    if (!userName) {
+      return socket.emit('error', { message: 'User not found' });
+    }
+    const userRoom = await this.roomService.findUserRoom(
+      body.room,
+      userName.id,
+    );
+    console.log('userRoom=========>', userRoom);
+    if (!userRoom) {
+      return socket.emit('error', { message: 'User has not joined this room' });
+    }
+    // const currentUserCreatedAt = new Date(userRoom?.createdAt);
+    // const sortedMessages = Room.filter((message) => {
+    //   console.log('message=========>', message);
+    //   const messageTime = new Date(message.createdAt);
+    //   return currentUserCreatedAt < messageTime;
+    // });
+    // console.log('sortedMessages====>', sortedMessages);
+    // New code working but need to test
+    const joinedAt = new Date(userRoom.createdAt).getTime();
+    const sortedMessages = Room.filter(
+      (msg) => new Date(msg.createdAt).getTime() >= joinedAt,
+    ).sort(
       (a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
     socket.emit('room_messages', sortedMessages);
-    socket.broadcast.emit('room_messages', sortedMessages);
+    // socket.broadcast.emit('room_messages', sortedMessages);
   }
 
   @SubscribeMessage('edit_message')
-  async handleDeleteMessage(
+  async handleEditMessage(
     @MessageBody() body: { id: string; message: string },
     @ConnectedSocket() socket: Socket,
   ) {
@@ -116,14 +157,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.broadcast.emit('message_edited', updatedMessage);
   }
 
-  // @SubscribeMessage('delete_message')
-  // handleDeleteMessage(
-  //   @MessageBody() body: any,
-  //   @ConnectedSocket() socket: Socket,
-  // ) {
-  //   console.log("body===========>",body)
-  //   console.log("body.id===========>",body.id)
-  //   await this.messageService.remove(body.id);
-  //   socket.broadcast.emit('message_deleted', body.id);
-  // }
+  @SubscribeMessage('delete_message')
+  async handleDeleteMessage(
+    @MessageBody() body: any,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    console.log('body===========>', body);
+    console.log('body.id===========>', body.id);
+    const deletedMessage = await this.messageService.remove(body.id);
+    socket.emit('message_deleted', deletedMessage);
+    socket.broadcast.emit('message_deleted', deletedMessage);
+  }
 }

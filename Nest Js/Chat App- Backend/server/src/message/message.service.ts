@@ -42,7 +42,7 @@ export class MessageService {
       room: findRoom,
       user: findUser,
     });
-    const savedMessage=await this.messageRepository.save(newMessage);
+    const savedMessage = await this.messageRepository.save(newMessage);
     // console.log("message sent from ===========>", savedMessage)
     return savedMessage;
   }
@@ -68,7 +68,15 @@ export class MessageService {
     return updatedMessage;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} message`;
+  async remove(id: string) {
+    const message = await this.messageRepository.findOne({
+      where: { id: Number(id) },
+      relations: ['user', 'room'],
+    });
+    if (message) {
+      message.isDeleted = true;
+      return await this.messageRepository.save(message);
+    }
+    // return `This action removes a #${id} message`;
   }
 }

@@ -26,46 +26,19 @@ export class RoomService {
   async findRoom(room: string) {
     return await this.roomRepository.findOne({ where: { room_name: room } });
   }
+  async findUserRoom(room_name: string, userId: number) {
+    return await this.roomRepository.findOne({
+      where: {
+        room_name,
+        user: { id: userId },
+      },
+      relations: ['user'],
+    });
+  }
 
   // async findAllRoom(room: string) {
   //   return await this.roomRepository.find({where:{room_name:room},relations:['messages']})
   // }
-
-  // Latest code:-
-  // async findAllRoom(room_name: string) {
-  //   const rooms = await this.roomRepository.find({
-  //     where: { room_name },
-  //     relations: ['messages', 'messages.user'],
-  //   });
-
-  //   const allMessages: {
-  //     messageId: number;
-  //     message: string;
-  //     createdAt: Date;
-  //     updatedAt: Date;
-  //     userId: number;
-  //     roomId: number;
-  //   }[] = [];
-
-  //   for (const room of rooms) {
-  //     if (room.messages && room.messages.length > 0) {
-  //       for (const message of room.messages) {
-  //         const messageData = {
-  //           messageId: message.id,
-  //           message: message.message,
-  //           createdAt: message.createdAt,
-  //           updatedAt: message.updatedAt,
-  //           userId: message.user?.id,
-  //           roomId: room.id,
-  //         };
-  //         allMessages.push(messageData);
-  //       }
-  //     }
-  //   }
-
-  //   return allMessages;
-  // }
-
 
   async findAllRoom(room_name: string) {
     const rooms = await this.roomRepository.find({
@@ -75,6 +48,7 @@ export class RoomService {
     const allMessages: {
       id: number;
       message: string;
+      isDeleted: boolean;
       createdAt: Date;
       updatedAt: Date;
       user: {
@@ -86,13 +60,14 @@ export class RoomService {
         room_name: string;
       };
     }[] = [];
-  
+
     for (const room of rooms) {
       if (room.messages && room.messages.length > 0) {
         for (const message of room.messages) {
           const messageData = {
             id: message.id,
             message: message.message,
+            isDeleted: message.isDeleted,
             createdAt: message.createdAt,
             updatedAt: message.updatedAt,
             user: {
@@ -108,7 +83,6 @@ export class RoomService {
         }
       }
     }
-  
     return allMessages;
   }
   update(id: number, updateRoomDto: UpdateRoomDto) {

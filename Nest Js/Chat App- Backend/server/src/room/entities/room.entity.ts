@@ -2,6 +2,7 @@ import { Message } from 'src/message/entities/message.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -21,4 +22,7 @@ export class Room {
 
   @OneToMany(() => Message, (message) => message.room)
   messages: Message[];
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
