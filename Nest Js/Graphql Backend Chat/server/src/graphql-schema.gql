@@ -1,0 +1,85 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Message {
+  id: Float!
+  message: String!
+  isDeleted: Boolean!
+  room: Room!
+  user: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Room {
+  id: Float!
+  room_name: String!
+  user: User!
+  messages: [Message!]!
+  createdAt: DateTime!
+}
+
+type User {
+  id: Float!
+  username: String!
+  password: String!
+  rooms: [Room!]!
+  createdAt: DateTime!
+}
+
+type UserOutput {
+  id: String!
+  username: String!
+  room: String!
+}
+
+type LoginResponse {
+  access_token: String!
+  room_name: String!
+  user: UserOutput!
+}
+
+type Query {
+  healthCheck: String!
+  findAllMessages(room_name: String!, username: String!): [Message!]!
+}
+
+type Mutation {
+  login(loginInput: LoginUserInput!): LoginResponse!
+  sendMessage(sendMessageInput: SendMessageInput!): Message!
+  updateMessage(updateMessageInput: UpdateMessageInput!): Message!
+  deleteMessage(deleteMessageInput: DeleteMessageInput!): Message!
+}
+
+input LoginUserInput {
+  username: String!
+  password: String!
+  room: String!
+}
+
+input SendMessageInput {
+  room_name: String!
+  message: String
+  username: String
+}
+
+input UpdateMessageInput {
+  id: Float!
+  message: String
+}
+
+input DeleteMessageInput {
+  id: Float!
+}
+
+type Subscription {
+  messageSent(room_name: String!): Message!
+  messageUpdated(room_name: String!): Message!
+  messageDeleted(room_name: String!): Message!
+}
